@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HIDA/EEL Render Farm POC — Strategy</title>
+<style>
+  :root {
+    --surface: #1a1a1a;
+    --surface-raised: #2a2a2a;
+    --text: #e8e8e8;
+    --text-muted: #9aa0a6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #121212;
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 32px 20px 80px; }
+  header.page {
+    border-bottom: 1px solid #2a2a2a;
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+  }
+  header.page h1 { margin: 0 0 6px; font-size: 1.6em; }
+  header.page p { margin: 0; color: var(--text-muted); font-size: 0.95em; }
+  nav.toc { margin: 18px 0 8px; font-size: 0.9em; }
+  nav.toc a { color: #4a9eff; text-decoration: none; margin-right: 18px; }
+  nav.toc a:hover { text-decoration: underline; }
+  section { margin-top: 28px; }
+  section > h2.section-title {
+    font-size: 1.15em;
+    margin: 0 0 10px;
+    padding-left: 10px;
+    border-left: 3px solid #4a9eff;
+  }
+  footer.page {
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px solid #2a2a2a;
+    color: var(--text-muted);
+    font-size: 0.8em;
+  }
+  code { background: #000; padding: 1px 5px; border-radius: 3px; font-size: 0.88em; }
+  a { color: #4a9eff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <h1>HIDA/EEL Render Farm — Proof of Concept Strategy</h1>
+  <p>AWS Deadline Cloud · managed render farm · phased evaluation. Internal working document for Don &amp; Greg.</p>
+</header>
+
+<nav class="toc">
+  <a href="#strategy">Phased strategy</a>
+  <a href="#cost">What $200 buys</a>
+  <a href="#dcc">DCC support matrix</a>
+</nav>
+
+<section id="strategy">
+  <h2 class="section-title">1 · Phased strategy</h2>
+
+  <div style="font-family:system-ui,-apple-system,sans-serif;background:var(--surface,#1a1a1a);color:var(--text,#e8e8e8);padding:20px;border-radius:10px;line-height:1.5;">
+
+  <div style="background:var(--surface-raised,#2a2a2a);border-left:4px solid #4a9eff;padding:12px 16px;border-radius:6px;margin-bottom:18px;">
+  <strong style="color:#4a9eff;">Where things stand.</strong> Don has onboarded the professors to the sandbox account (which carries $200 of AWS credit). We have <strong>not yet verified</strong> whether they have deployed anything or spent any of the credit. The access model is open (<code>AdministratorAccess</code>) today. Rather than tear that down before we know what's been built, Phase 0 is to <em>find out</em> — then publish this plan, restart the conversation, and deploy deliberately.
+  </div>
+
+  <h3 style="margin:0 0 6px;">Service spine</h3>
+  <p style="margin:0 0 16px;font-size:0.92em;">AWS <strong>Deadline Cloud</strong> (managed): <strong>Farm → Queue → Fleet</strong>. A service-managed fleet means AWS runs and scales the workers (0 → thousands); usage-based licensing (UBL) covers Maya and the renderers with no license server to operate. Pay-as-you-go. The POC uses a service-managed fleet to keep the operational burden near zero.</p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:0.84em;">
+  <thead>
+  <tr style="background:var(--surface-raised,#2a2a2a);text-align:left;">
+  <th style="padding:8px;border-bottom:2px solid #444;">Phase</th>
+  <th style="padding:8px;border-bottom:2px solid #444;">Scope</th>
+  <th style="padding:8px;border-bottom:2px solid #444;">What happens</th>
+  <th style="padding:8px;border-bottom:2px solid #444;">Exit gate → next phase</th>
+  </tr>
+  </thead>
+  <tbody>
+
+  <tr>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;"><strong>0 · Verify &amp; align</strong></td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Establish the real current state before any new work</td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Confirm what the professors can access today, whether Deadline Cloud (or anything) was deployed, and how much of the $200 has been spent (Cost Explorer / Billing). Turn on CloudTrail + a read-only AWS Budget so we can <em>see</em> spend — observability, not restriction. Document findings.</td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Current access, deployment state and spend are known and written down.</td>
+  </tr>
+
+  <tr>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;"><strong>0.5 · Publish &amp; restart</strong></td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Internal alignment with Don &amp; Greg</td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Publish this strategy and share it with <strong>Don</strong> and <strong>Greg</strong>. Agree the deployment plan, the spend guardrails we want in place, and who leads the professor conversation. <em>Then</em> re-engage the professors to kick off Phase 1.</td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Don &amp; Greg signed off; professor conversation scheduled.</td>
+  </tr>
+
+  <tr>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;"><strong>1 · First deployment (POC)</strong></td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Professors run a first real render job within the $200</td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">Stand up Farm → Queue → service-managed Fleet. 1–2 professors submit a representative but modest render (single DCC, e.g. Maya). Budget alarms at 50 / 80 / 100% of $200. Tighten access toward a scoped render role <em>as a recommendation</em> once we know what the workflow actually needs — not as a precondition to starting.</td>
+  <td style="padding:8px;border-bottom:1px solid #333;vertical-align:top;">A job renders end-to-end; cost per frame/job captured; professors can submit unaided.</td>
+  </tr>
+
+  <tr>
+  <td style="padding:8px;vertical-align:top;"><strong>2 · Expand &amp; evaluate</strong></td>
+  <td style="padding:8px;vertical-align:top;">Scale to intensive, expensive jobs with AWS alongside</td>
+  <td style="padding:8px;vertical-align:top;">Work with <strong>Lorena and her AWS product team</strong>: share Phase 1 feedback, then push the POC into heavier, more expensive rendering (larger scenes, bigger fleets, multiple DCCs) to evaluate the service under real load. AWS helps right-size fleets and licensing; we decide whether Deadline Cloud is the answer for HIDA/EEL.</td>
+  <td style="padding:8px;vertical-align:top;">Go / no-go decision on Deadline Cloud for production, with cost and performance evidence.</td>
+  </tr>
+
+  </tbody>
+  </table>
+
+  <h3 style="margin:18px 0 6px;">Immediate next steps</h3>
+  <ol style="margin:0;padding-left:20px;font-size:0.9em;">
+  <li>Verify current access + whether anything was deployed + $200 spend to date.</li>
+  <li>Publish this strategy; share with Don and Greg and agree the plan.</li>
+  <li>Re-engage the professors for the Phase 1 deployment.</li>
+  <li>Line up Lorena's AWS product team for the Phase 2 expansion.</li>
+  </ol>
+
+  <p style="margin:16px 0 0;font-size:0.78em;color:var(--text-muted,#9aa0a6);">Note: least-privilege tightening (scoping down <code>AdministratorAccess</code>) is a recommendation we land during Phase 1 once the workflow is understood — a guardrail, not a blocker to getting started.</p>
+
+  </div>
+</section>
+
+<section id="cost">
+  <h2 class="section-title">2 · What $200 buys on AWS Deadline Cloud</h2>
+
+  <div style="font-family:system-ui,-apple-system,sans-serif;background:var(--surface,#1a1a1a);color:var(--text,#e8e8e8);padding:20px;border-radius:10px;line-height:1.55;">
+
+  <p style="margin:0 0 16px;">Your bill = <strong>three stacked components</strong>, charged per worker-hour while a fleet is running (scales to zero = $0):</p>
+
+  <table style="width:100%;border-collapse:collapse;font-size:0.86em;margin-bottom:18px;">
+  <tr style="background:var(--surface-raised,#2a2a2a);">
+  <td style="padding:8px;border-bottom:1px solid #333;"><strong>1. EC2 compute</strong></td>
+  <td style="padding:8px;border-bottom:1px solid #333;">The instance itself. Spot is far cheaper than On-Demand; "Wait &amp; Save" is cheaper still for non-urgent jobs. A small Linux worker ≈ <strong>$0.20–0.50/hr spot</strong>; a big GPU worker can be <strong>$3–8+/hr</strong>.</td>
+  </tr>
+  <tr>
+  <td style="padding:8px;border-bottom:1px solid #333;"><strong>2. Deadline Cloud mgmt fee</strong></td>
+  <td style="padding:8px;border-bottom:1px solid #333;">AWS's charge to run the farm, per worker-hour, scaled to instance size. (CMF reference point: ~$1/worker-hr. SMF varies by instance.)</td>
+  </tr>
+  <tr>
+  <td style="padding:8px;border-bottom:1px solid #333;"><strong>3. Usage-based licensing (UBL)</strong></td>
+  <td style="padding:8px;border-bottom:1px solid #333;">Only if you use managed Maya/Arnold/Nuke/etc. licenses — billed per hour <em>per product</em> while rendering. This is the sneaky one: Maya + Arnold together can add <strong>$1–3+/hr on top</strong>. Bring-your-own-license avoids it.</td>
+  </tr>
+  </table>
+
+  <p style="margin:0 0 8px;"><strong>Rough blended rate per worker-hour</strong> (small Linux spot + mgmt + light UBL): ballpark <strong>$1–2/hr</strong>. Heavy GPU + Maya/Arnold UBL: easily <strong>$6–12/hr</strong>.</p>
+
+  <div style="background:var(--surface-raised,#2a2a2a);border-radius:6px;padding:12px 16px;margin:16px 0;">
+  <strong>So what does $200 get?</strong>
+  <ul style="margin:8px 0 0;padding-left:20px;">
+  <li><strong>~100–200 worker-hours</strong> at the light end (small CPU jobs, BYO or no license).</li>
+  <li><strong>~15–30 worker-hours</strong> at the heavy end (GPU + managed Maya/Arnold).</li>
+  </ul>
+  </div>
+
+  <p style="margin:0 0 6px;"><strong>Translated to "jobs":</strong> a worker-hour is one instance running for an hour, and a job fans out across many workers in parallel. So a single 240-frame animation at ~2 min/frame on 10 workers ≈ <strong>8 worker-hours</strong> ≈ $8–16 light / $50–100 heavy.</p>
+
+  <p style="margin:10px 0 0;font-size:0.9em;"><strong>Realistic POC envelope:</strong> comfortably <strong>5–15 small-to-medium real render jobs</strong>, OR 1–3 heavy GPU/animation jobs, with budget headroom to iterate. Enough to prove it end-to-end and get a true cost-per-frame for HIDA's actual scenes. <em>Not</em> enough for a class — a 30-student course would blow $200 in days.</p>
+
+  <p style="margin:14px 0 0;font-size:0.78em;color:var(--text-muted,#999);">Exact SMF per-instance mgmt fee lives in a dynamic pricing table I couldn't scrape — these are grounded order-of-magnitude figures from AWS's published cost model (3 components, CMF ~$1/worker-hr reference, UBL per-product-per-hour). Pin exact numbers via the AWS Pricing Calculator once we know HIDA's DCC + renderer + instance type.</p>
+  </div>
+</section>
+
+<section id="dcc">
+  <h2 class="section-title">3 · HIDA DCC stack vs AWS Deadline Cloud support</h2>
+
+  <div style="font-family:system-ui,-apple-system,sans-serif;background:var(--surface,#1a1a1a);color:var(--text,#e8e8e8);padding:20px;border-radius:10px;line-height:1.5;">
+
+  <p style="margin:0 0 14px;font-size:0.92em;">Three tiers by how cleanly each runs on a <strong>service-managed fleet</strong> (AWS runs the workers). Tier 1 is where the POC should live — zero license-server ops.</p>
+
+  <div style="background:var(--surface-raised,#223322);border-left:4px solid #52b788;padding:10px 14px;border-radius:6px;margin-bottom:10px;">
+  <strong style="color:#52b788;">✓ Tier 1 — turnkey (submitter + conda + UBL/none)</strong>
+  <table style="width:100%;border-collapse:collapse;font-size:0.84em;margin-top:8px;">
+  <tr style="text-align:left;color:var(--text-muted,#aaa);"><th style="padding:3px 6px;">App</th><th style="padding:3px 6px;">Licensing</th><th style="padding:3px 6px;">Note</th></tr>
+  <tr><td style="padding:3px 6px;">Blender</td><td style="padding:3px 6px;color:#52b788;">Not needed (free)</td><td style="padding:3px 6px;">Cheapest path — no UBL cost at all</td></tr>
+  <tr><td style="padding:3px 6px;">Maya</td><td style="padding:3px 6px;">UBL ✓</td><td style="padding:3px 6px;">Full integration, Linux workers</td></tr>
+  <tr><td style="padding:3px 6px;">Houdini</td><td style="padding:3px 6px;">UBL ✓</td><td style="padding:3px 6px;">19.5–22.0</td></tr>
+  <tr><td style="padding:3px 6px;">Cinema 4D</td><td style="padding:3px 6px;">UBL ✓</td><td style="padding:3px 6px;">2024–2026</td></tr>
+  <tr><td style="padding:3px 6px;">Arnold (Maya / C4D)</td><td style="padding:3px 6px;">UBL ✓</td><td style="padding:3px 6px;">Pairs with Maya/C4D</td></tr>
+  <tr><td style="padding:3px 6px;">V-Ray (for Maya)</td><td style="padding:3px 6px;">UBL ✓</td><td style="padding:3px 6px;">V-Ray 6–7, via Maya</td></tr>
+  <tr><td style="padding:3px 6px;">Redshift (for Maya)</td><td style="padding:3px 6px;">UBL ✓</td><td style="padding:3px 6px;">GPU renderer, via Maya</td></tr>
+  <tr><td style="padding:3px 6px;">Unreal Engine</td><td style="padding:3px 6px;color:#52b788;">Not needed</td><td style="padding:3px 6px;">Windows workers only</td></tr>
+  </table>
+  </div>
+
+  <div style="background:var(--surface-raised,#333322);border-left:4px solid #e9c46a;padding:10px 14px;border-radius:6px;margin-bottom:10px;">
+  <strong style="color:#e9c46a;">△ Tier 2 — runs, but BYO license (no UBL)</strong>
+  <table style="width:100%;border-collapse:collapse;font-size:0.84em;margin-top:8px;">
+  <tr><td style="padding:3px 6px;width:33%;">After Effects</td><td style="padding:3px 6px;">Submitter + conda, <strong>UBL = No</strong>. Windows workers. Bring your own Adobe license.</td></tr>
+  </table>
+  </div>
+
+  <div style="background:var(--surface-raised,#332222);border-left:4px solid #e76f51;padding:10px 14px;border-radius:6px;">
+  <strong style="color:#e76f51;">✗ Tier 3 — not in the table, must self-package / BYOL</strong>
+  <table style="width:100%;border-collapse:collapse;font-size:0.84em;margin-top:8px;">
+  <tr><td style="padding:3px 6px;width:33%;">Mantra (Houdini)</td><td style="padding:3px 6px;">Houdini's old renderer — comes with Houdini, but no separate UBL line; runs under the Houdini package.</td></tr>
+  <tr><td style="padding:3px 6px;">Karma <em>(requested)</em></td><td style="padding:3px 6px;">Houdini's new renderer — ships inside Houdini, so runs via the Houdini package; no separate UBL.</td></tr>
+  <tr><td style="padding:3px 6px;">RenderMan <em>(requested)</em></td><td style="padding:3px 6px;">Pixar — <strong>not</strong> in the supported table. Needs a custom conda package + BYO RenderMan license server.</td></tr>
+  </table>
+  </div>
+
+  <p style="margin:14px 0 0;font-size:0.82em;color:var(--text-muted,#999);">Source: AWS Deadline Cloud "Supported Software" matrix (submitter / conda / UBL columns). Arnold, V-Ray, Redshift are all licensed <em>via the Maya integration</em>. Deadline itself is the submission/queue layer — that's the service, not a separate app to license.</p>
+  </div>
+</section>
+
+<footer class="page">
+  Internal working document. Figures are order-of-magnitude pending exact AWS Pricing Calculator numbers. Not for external distribution.
+</footer>
+
+</div>
+</body>
+</html>
